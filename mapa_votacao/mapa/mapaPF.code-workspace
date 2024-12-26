@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "mapaPF",
+			"path": "../.."
+		},
+		{
+			"name": "dados_votacao_pf_2024",
+			"path": "../../../../Downloads/dados_votacao_pf_2024"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "mapaPF"
+	}
+}
