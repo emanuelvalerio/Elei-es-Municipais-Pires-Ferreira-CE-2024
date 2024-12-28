@@ -1,7 +1,7 @@
 
 from django.urls import path
-from . import views
+from .views import atualizar_mapa
 
 urlpatterns = [
-    path('', views.mapa_view, name='mapa_view'),
+    path('', atualizar_mapa, name='atualizar_mapa'),
 ]

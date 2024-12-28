@@ -1,14 +1,43 @@
-{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Votação</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* Estilo geral */
+
+        /* Estilo do spinner */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border-left-color: #007bff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -18,32 +47,64 @@
             flex-direction: column;
         }
 
-        /* Estilo para o mapa */
-        #mapa_renderizado {
+        #mapa {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0; /* Colocado atrás do menu */
+            z-index: 0;
         }
 
-        /* Estilo para o menu */
-        .menu-container {
+        .year-selector {
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10; /* Sobrepõe o mapa */
+            z-index: 10;
             display: flex;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.5); /* Fundo branco semitransparente */
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.8);
             padding: 10px 20px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        /* Estilo para os círculos dos candidatos */
+        .year-option {
+            padding: 5px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .year-option:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .year-option.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border-color: #007bff;
+        }
+
+        .menu-container {
+            position: absolute;
+            top: 135px; /* Distância suficiente abaixo do menu de anos */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15; /* Menor que o menu de anos */
+            display: none; /* Inicialmente escondido */
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
         .candidate {
             text-align: center;
             cursor: pointer;
@@ -53,29 +114,17 @@
             width: auto;
             height: auto;
             max-width: 80px;
-            aspect-ratio: 1 / 1; /* Circular */
+            aspect-ratio: 1 / 1;
             border-radius: 50%;
-            border: 3px solid transparent; /* Borda padrão */
-            object-position: top; /* Alinha o topo da imagem ao centro do círculo */
+            border: 5px solid transparent;
+            object-position: top;
             object-fit: cover;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
-        }
-
-        .candidate.red img {
-            border-color: red; /* Cor do partido */
-        }
-
-        .candidate.yellow img {
-            border-color: yellow;
-        }
-
-        .candidate.blue img {
-            border-color: blue;
+            transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out, border-color 0.3s ease-in-out;
         }
 
         .candidate img.active {
-            transform: scale(1.2); /* Zoom no círculo ativo */
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Destaque */
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
         }
 
         .candidate p {
@@ -83,62 +132,163 @@
             margin-top: 8px;
             color: black;
         }
+
     </style>
 </head>
 <body>
+
+    <div id="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    
+    <div id="mapa" aria-label="Mapa de Votação"></div>
+
+    <!-- Selector de anos -->
+<!-- Selector de anos -->
+<!-- Selector de anos -->
+<div class="year-selector" role="menu" aria-label="Selecionar Ano" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+
+    <!-- Texto acima dos botões -->
+    <div class="year-text" style="font-weight: bold; margin-bottom: 10px; font-size: 18px;">
+        Eleições Municipais Pires Ferreira Ceará
+    </div>
+    <!-- Botões do menu -->
+    <div class="year-options" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+        <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2000')">2000</span>
+        <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2004')">2004</span>
+        <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2008')">2008</span>
+        <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2012')">2012</span>
+        <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2016')">2016</span>
+        <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2020')">2020</span>
+        <span class="year-option active" style="padding: 10px 15px; font-weight: bold;" onclick="selecionarAno(this, '2024')">2024</span>
+    </div>
+</div>
     <!-- Menu -->
-    <div class="menu-container">
-        <div class="candidate red" onclick="selecionarCandidato(this, 'CORRINHA')">
-            <img src="{% static 'mapa/images/corrinha.jpg' %}" alt="Corrinha">
-            <p>CORRINHA</p>
-        </div>
-        <div class="candidate yellow" onclick="selecionarCandidato(this, 'DRA LIVIA')">
-            <img src="{% static 'mapa/images/livia.jpg' %}" alt="Dra. Lívia">
-            <p>Dra. LÌVIA</p>
-        </div>
-        <div class="candidate blue" onclick="selecionarCandidato(this, 'EDUARDO XI')">
-            <img src="{% static 'mapa/images/eduardo.jpeg' %}" alt="Eduardo Ximenes">
-            <p>EDUARDO</p>
-        </div>
-    </div>
+    <div class="menu-container" role="menu" aria-label="Candidatos"></div>
 
-    <!-- Mapa -->
-    <div id="mapa_renderizado">
-        {{ mapa_html|safe }}
-    </div>
-
-    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const mapaUrl = "{% url 'mapa_view' %}";
+        const mapaUrl = "{% url 'atualizar_mapa' %}";
+        const anoPadrao = '2024'; // Configuração padrão
+    document.addEventListener('DOMContentLoaded', function() {
+    // Botão ou ação que dispara a atualização do mapa
+    const atualizarMapa = async () => {
+        // Mostra o spinner de carregamento
+        document.getElementById('loading').style.display = 'flex';
 
-        // Função para selecionar o candidato
-        function selecionarCandidato(element, candidato) {
-            // Remove a classe 'active' de todas as imagens
-            document.querySelectorAll('.candidate img').forEach(function(img) {
-                img.classList.remove('active');
+        try {
+            // Envia a requisição AJAX para atualizar o mapa
+            const response = await fetch('/atualizar-mapa', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
             });
 
-            // Adiciona a classe 'active' na imagem do candidato selecionado
-            const img = element.querySelector('img');
-            if (img) {
-                img.classList.add('active');
-            }
+            if (response.ok) {
+                const data = await response.json();
 
-            // Faz a requisição AJAX
+                // Atualiza o mapa e outros elementos na página
+                document.getElementById('map-container').innerHTML = data.mapa_html;
+            } else {
+                console.error('Erro ao carregar o mapa');
+            }
+        } catch (error) {
+            console.error('Erro na requisição AJAX:', error);
+        } finally {
+            // Esconde o spinner após o carregamento
+            document.getElementById('loading').style.display = 'none';
+        }
+    };
+
+    // Adiciona o evento de clique no botão de atualização (caso exista)
+    const botaoAtualizar = document.getElementById('btn-atualizar-mapa');
+    if (botaoAtualizar) {
+        botaoAtualizar.addEventListener('click', atualizarMapa);
+    }
+});
+
+    function selecionarAno(element, ano) {
+            // Atualiza o botão ativo
+            document.querySelectorAll('.year-option').forEach(option => option.classList.remove('active'));
+            element.classList.add('active');
+
+            // Exibe o menu de candidatos
+            const menuContainer = document.querySelector('.menu-container');
+            menuContainer.style.display = 'flex';
+
+            // Carrega o mapa do ano selecionado
+            carregarMapa(ano);
+        }
+
+        function carregarMapa(ano) {
             $.ajax({
-                url: mapaUrl,  // URL gerada dinamicamente
-                data: {
-                    'candidato': candidato
-                },
+                url: mapaUrl,
+                data: { 'ano': ano },
                 success: function(response) {
-                    console.log("Resposta recebida:", response);
-                    $("#mapa_renderizado").html(response.mapa_html);
+                    if (response.mapa_html) {
+                        document.getElementById('mapa').innerHTML = response.mapa_html;
+                    } else {
+                        console.error("Erro ao carregar o mapa.");
+                    }
+
+                    if (response.candidatos) {
+                        atualizarCandidatos(response.candidatos);
+                    } else {
+                        console.error("Candidatos não encontrados.");
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.error("Erro na requisição AJAX:", error);
                 }
             });
         }
+
+    function atualizarCandidatos(candidatos) {
+            const menuContainer = document.querySelector('.menu-container');
+            menuContainer.innerHTML = ''; // Limpa o menu
+
+            candidatos.forEach(candidato => {
+                const div = document.createElement('div');
+                div.classList.add('candidate');
+
+                div.onclick = () => selecionarCandidato(div, candidato.nome);
+
+                const img = document.createElement('img');
+                img.src = candidato.imagem_url;
+                img.alt = candidato.nome;
+                img.style.border = `5px solid ${candidato.cor}`;
+                const p = document.createElement('p');
+                p.textContent = candidato.nome;
+
+                div.append(img, p);
+                menuContainer.appendChild(div);
+            });
+        }
+
+        function selecionarCandidato(element, candidato) {
+            document.querySelectorAll('.candidate img').forEach(img => img.classList.remove('active'));
+            element.querySelector('img').classList.add('active');
+
+            const anoSelecionado = document.querySelector('.year-option.active').textContent.trim();
+
+            $.ajax({
+                url: mapaUrl,
+                data: { 'ano': anoSelecionado, 'candidato': candidato },
+                success: function(response) {
+                    if (response.mapa_html) {
+                        document.getElementById('mapa').innerHTML = response.mapa_html;
+                    } else {
+                        console.error("Erro ao atualizar o mapa.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Erro na requisição AJAX:", error);
+                }
+            });
+        }
+
+        $(document).ready(() => carregarMapa(anoPadrao));
     </script>
 </body>
 </html>
