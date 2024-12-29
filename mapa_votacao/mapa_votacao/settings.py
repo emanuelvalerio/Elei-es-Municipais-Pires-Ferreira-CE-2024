@@ -9,12 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = '/static/'
 
 # Define directories where static files are stored in development
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Diretório onde você coloca arquivos estáticos adicionais
-]
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'static'),  # Diretório onde você coloca arquivos estáticos adicionais
+#]
 
 # Define STATIC_ROOT for collecting static files in production
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Diretório onde os arquivos coletados serão armazenados
+#STATIC_ROOT = BASE_DIR / 'staticfiles'  # Diretório onde os arquivos coletados serão armazenados
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-1!ts+4^zmsjcw$t@cjbk#yf&2nw-+qk4jikh%52=a-d@@h7p%e"
