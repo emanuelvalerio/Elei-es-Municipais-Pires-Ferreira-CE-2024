@@ -75,63 +75,26 @@ def cor_bairro(dado, colunas_porcentagem, colunas, year):
             valor = safe_float_conversion(dado[col])
             if valor > maior_percentual:
                 maior_percentual = valor
-                print("PARTIDO")
-                print(nome_candidato("Part_"+nome_candidato(col.replace('Perc_', '').upper(), colunas),colunas))
-                cor = cor_dinamica(nome_candidato(col.replace('Perc_', '').upper(), colunas), year)
-                print(nome_candidato(col.replace('Perc_', '').upper(), colunas))
+                name = f"Partido_{nome_candidato(col.replace('Perc_', '').upper(), colunas).upper()}";
+                print("nome: ",name)
+                for j in range(len(colunas)):
+                    if(colunas[j] == name[:len(colunas[j] )]):
+                         partido = dado.get(colunas[j],0)
+                cor = cor_partido(partido);
         return cor  
 
-def cor_dinamica(partido):
+def cor_partido(partido):
     cores = {
         'PT':'#c4122d',
         'PSB':'#FFCC00',
         'PP': '#0067A5',
         'PDT': '#FE8E6D',
         'PTB':'#005533',
-        'PSD': '#FFA500'      
+        'PSD': '#FFA500',
+        'PPS':'#ec008c',
+        'PSDB':'#0080FF'
     }
     return cores.get(partido, "Candidato não encontrado")
-
-def cor_dinamica(name_candidate, ano):
-        print(ano == '2024',name_candidate)
-        cores = {}
-        if ano == '2024':
-            cores = {
-                'CORRINHA': '#c4122d',
-                'DRA LIVIA': '#FFCC00',
-                'EDUARDO XI': '#0067A5',
-            }
-        elif ano == '2020':
-            cores = {
-                'JOSE AUGUS': '#005533',
-                'DRA LIVIA': '#FE8E6D',
-            }
-        elif ano == '2016':
-            cores = {
-                'JOSE AUGUS': '#009AE2',
-                'MARFISA': '#FE8E6D',
-            }
-        elif ano == '2012':
-            cores = {
-                'MARFISA':'#FFCC00',
-                'TORRES NET': '#0080FF'
-            }
-        elif ano == '2008':
-            cores = {
-                'MARCOS MAR':'#FFCC00',
-                'TORRIM':'#0080FF'
-            }
-        elif ano == '2004':
-            cores = {
-                'JOSE FLAVI':'#c4122d', #PT
-                'MARCOS MAR':'#0080FF'#PSDB
-            }
-        elif ano == '2000':
-            cores = {
-                'ENOQUE MOR':'#ec008c' ,#PPS
-                'TORRIM':'#0080FF'#PSDB
-            }
-        return cores.get(name_candidate, "Candidato não encontrado")
     
 def safe_float_conversion(value):
         if isinstance(value, str):
@@ -176,6 +139,11 @@ def atualizar_mapa(request):
 
     for i, dado in gdf.iterrows():
         bairro = dado['Endereço']
+        name = f"Partido_{candidato.upper()}"
+        for j in range(len(colunas)):
+            if(colunas[j] == name[:len(colunas[j] )]):
+                partido = colunas[j];
+        print('Partido: '+partido)
         cor = cor_bairro(dado, colunas_porcentagem.copy(), colunas.copy(), ano)
         # Recuperar o percentual do candidato no bairro atual
         coluna_percentual = nome_candidato(f"Perc_{candidato.upper()}", colunas) 
@@ -192,11 +160,12 @@ def atualizar_mapa(request):
                 'fillOpacity': 2
             },
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['Endereço', 'Local de V',coluna_percentual],  # Inclua apenas campos que você precisa
+            fields=['Endereço', 'Local de V',coluna_percentual,partido],  # Inclua apenas campos que você precisa
             aliases=[
                 'Endereço:', 
                 'Local de Votação:',
-                f'{candidato} ({percentual_formatado}):'
+                f'{candidato} ({percentual_formatado}):',
+                "Partido: "
             ],
             localize=True,
             sticky=True,
@@ -211,6 +180,7 @@ def atualizar_mapa(request):
             f"<b>Bairro:</b> {bairro}<br>"
             f"<b>Candidato:</b> {candidato}<br>"
             f"<b>Percentual:</b> {percentual_formatado}",
+            
             max_width=300
         )
         ).add_to(mapa_pf)
