@@ -98,7 +98,7 @@
             transform: translateX(-50%);
             z-index: 15; /* Menor que o menu de anos */
             display: none; /* Inicialmente escondido */
-            gap: 50px;
+            gap: 80px;
             background: rgba(255, 255, 255, 0.8);
             padding: 10px 20px;
             border-radius: 10px;
@@ -133,6 +133,27 @@
             color: black;
         }
 
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 10px 0;
+            font-size: 14px;
+            border-top: 1px solid #ddd;
+            z-index: 20; /* Garante que o rodapé fique acima do conteúdo */
+}
+
+
+        footer p {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+
     </style>
 </head>
 <body>
@@ -165,6 +186,10 @@
 </div>
     <!-- Menu -->
     <div class="menu-container" role="menu" aria-label="Candidatos"></div>
+
+    <footer>
+        <p>&copy; 2024 Developed by Emanuel Valério Pereira. All rights reserved.</p>
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -288,6 +313,6 @@
         }
 
         $(document).ready(() => carregarMapa(anoPadrao));
-    </script>
+    </script>a
 </body>
 </html>

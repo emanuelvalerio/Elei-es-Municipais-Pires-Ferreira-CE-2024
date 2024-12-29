@@ -104,7 +104,6 @@ def safe_float_conversion(value):
         return value
           
 def atualizar_mapa(request):
-        
     # Obter o candidato e o ano
     candidato = request.GET.get('candidato', None)
     ano = request.GET.get('ano', '2024')
@@ -116,8 +115,8 @@ def atualizar_mapa(request):
 
     colunas = gdf.columns.tolist()
     colunas_porcentagem = [col for col in colunas if col.startswith('Perc_')]
-    
-       # Atualizar candidatos
+
+    # Atualizar candidatos
     candidatos_disponiveis = atualizar_candidatos_por_ano(ano)
     nomes_candidatos = [c['nome'] for c in candidatos_disponiveis]
 
@@ -125,35 +124,49 @@ def atualizar_mapa(request):
         return JsonResponse({'error': f"Nenhum candidato encontrado para o ano {ano}."}, status=404)
     
     if candidato is None:
-        candidato = nomes_candidatos[0];
+        candidato = nomes_candidatos[0]
     elif candidato not in nomes_candidatos:
         return JsonResponse({'error': f"Candidato {candidato} não encontrado para o ano {ano}."}, status=404)
     
     # Criar o mapa
     mapa_pf = folium.Map(location=[-4.241, -40.636], zoom_start=12)
-    aux = 0;
-    tot_voto_cand = 0;
-    past_bairro = [];
+    aux = 0
+    tot_voto_cand = 0
+    past_bairro = []
+    
+    # Lista para armazenar as porcentagens
+    porcentagens = []
+    
     for i, dado in gdf.iterrows():
         bairro = dado['Endereço']
         name = f"Partido_{candidato.upper()}"
         for j in range(len(colunas)):
-            if(colunas[j] == name[:len(colunas[j] )]):
-                partido = colunas[j];
+            if(colunas[j] == name[:len(colunas[j])]):
+                partido = colunas[j]
+        
         cor = cor_bairro(dado, colunas_porcentagem.copy(), colunas.copy(), ano)
         # Recuperar o percentual do candidato no bairro atual
-        coluna_percentual = nome_candidato(f"Perc_{candidato.upper()}", colunas) 
+        coluna_percentual = nome_candidato(f"Perc_{candidato.upper()}", colunas)
         voto_cand = safe_float_conversion(dado.get(coluna_percentual, 0))
         tot = safe_float_conversion(dado.get('Total_voto', 0))
-        # Supondo que 'past_bairro' é uma lista ou conjunto já inicializado
+        
         if bairro not in past_bairro:
             aux += tot  # Incrementa somente uma vez
-            tot_voto_cand+=voto_cand;
+            tot_voto_cand += voto_cand
             past_bairro.append(bairro)  # Adiciona o bairro ao conjunto para evitar incrementos futuros
-        percentual = (voto_cand/tot)*100;
+        
+        percentual = (voto_cand / tot) * 100
         percentual_formatado = f"{percentual:.2f}%" if percentual else "0%"
-        percentual_total_candidato = (tot_voto_cand/aux)*100;
-        situacao = "Eleito (a)" if percentual_total_candidato>50 else "Não eleito (a)"
+        
+        # Adiciona a porcentagem à lista
+        porcentagens.append({
+            'bairro': bairro,
+            'percentual': percentual_formatado
+        })
+        
+        percentual_total_candidato = (tot_voto_cand / aux) * 100
+        situacao = "Eleito (a)" if percentual_total_candidato > 50 else "Não eleito (a)"
+        
         folium.GeoJson(
             gdf.iloc[i:i+1],
             style_function=lambda feature, color=cor: {
@@ -162,37 +175,48 @@ def atualizar_mapa(request):
                 'weight': 1,
                 'fillOpacity': 2
             },
-        tooltip=folium.features.GeoJsonTooltip(
-            fields=['Endereço', 'Local de V',coluna_percentual,partido],  # Inclua apenas campos que você precisa
-            aliases=[
-                'Endereço:', 
-                'Local de Votação:',
-                'Quantidade de Votos: 'f'{candidato}({percentual_formatado})',
-                "Partido: "
-            ],
-            localize=True,
-            sticky=True,
-        ),
-            highlight_function=lambda feature,color=cor: {
+            tooltip=folium.features.GeoJsonTooltip(
+                fields=['Endereço', 'Local de V', coluna_percentual, partido],
+                aliases=[
+                    'Endereço:', 
+                    'Local de Votação:',
+                    f'Quantidade de Votos: {candidato} ({percentual_formatado})',
+                    "Partido: "
+                ],
+                localize=True,
+                sticky=True,
+            ),
+            highlight_function=lambda feature, color=cor: {
                 'color': 'black',
                 'weight': 5,
                 'fillOpacity': 0.5,
                 'fillColor': color
             },
-        popup=folium.Popup(
-            f"<b>Bairro:</b> {bairro}<br>"
-            f"<b>Candidato:</b> {candidato}<br>"
-            f"<b>Percentual:</b> {percentual_formatado}",
-            
-            max_width=300
-        )
+            popup=folium.Popup(
+                f"<b>Bairro:</b> {bairro}<br>"
+                f"<b>Candidato:</b> {candidato}<br>"
+                f"<b>Percentual:</b> {percentual_formatado}",
+                max_width=300
+            )
         ).add_to(mapa_pf)
 
     mapa_html = mapa_pf._repr_html_()
 
     # Retorno AJAX
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'mapa_html': mapa_html, 'candidatos': candidatos_disponiveis, 'ano': ano, 'candidato_selecionado': candidato})
-    
-    return render(request, 'mapa/mapa.html', {'mapa_html': mapa_html, 'candidato': candidato, 'ano': ano})
+        return JsonResponse({
+            'mapa_html': mapa_html, 
+            'candidatos': candidatos_disponiveis, 
+            'ano': ano, 
+            'candidato_selecionado': candidato,
+            'percentual_total_candidato': round(percentual_total_candidato, 2),  # Porcentagem total do candidato
+            'situacao': situacao,  # Situação eleitoral
+            'porcentagens': porcentagens,  # Lista de porcentagens por bairro
+        })
 
+    
+    return render(request, 'mapa/mapa.html', {
+        'mapa_html': mapa_html, 
+        'candidato': candidato, 
+        'ano': ano,
+    })
