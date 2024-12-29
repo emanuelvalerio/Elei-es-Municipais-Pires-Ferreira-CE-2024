@@ -12,36 +12,36 @@ def atualizar_candidatos_por_ano(ano):
         return [
             {'nome': "CORRINHA", 'cor': '#c4122d', 'imagem_url': '/static/mapa/images/corrinha.jpg'},
             {'nome': "DRA LIVIA", 'cor': '#FFCC00', 'imagem_url': '/static/mapa/images/livia.jpg'},
-            {'nome': "EDUARDO XI", 'cor': '#0067A5', 'imagem_url': '/static/mapa/images/eduardo.jpeg'},
+            {'nome': "EDUARDO XIMENES", 'cor': '#0067A5', 'imagem_url': '/static/mapa/images/eduardo.jpeg'},
         ]
    elif ano == "2020":
         return [
-            {'nome': "JOSE AUGUS", 'cor': '#005533', 'imagem_url': '/static/mapa/images/jose_augusto_2020.jpg'},
+            {'nome': "JOSE AUGUSTO", 'cor': '#005533', 'imagem_url': '/static/mapa/images/jose_augusto_2020.jpg'},
             {'nome': "DRA LIVIA", 'cor': '#FE8E6D', 'imagem_url': '/static/mapa/images/livia_2020.jpeg'},
         ]
    elif ano=="2016":
        return[
-            {'nome': "JOSE AUGUS", 'cor': '#009AE2', 'imagem_url': '/static/mapa/images/jose_augusto_2016.jpg'},
-            {'nome': "MARFISA", 'cor': '#FE8E6D', 'imagem_url': '/static/mapa/images/marfisa_2016.jpg'},]
+            {'nome': "JOSE AUGUSTO", 'cor': '#009AE2', 'imagem_url': '/static/mapa/images/jose_augusto_2016.jpg'},
+            {'nome': "MARFISA AGUIAR", 'cor': '#FE8E6D', 'imagem_url': '/static/mapa/images/marfisa_2016.jpg'},]
 
    elif ano=="2012":
        return[
-            {'nome': "TORRES NET", 'cor': '#0080FF', 'imagem_url': '/static/mapa/images/torres_neto.png'},
-            {'nome': "MARFISA", 'cor': '#FFCC00', 'imagem_url': '/static/mapa/images/marfisa_2012.png'},]
+            {'nome': "TORRES NETO", 'cor': '#0080FF', 'imagem_url': '/static/mapa/images/torres_neto.png'},
+            {'nome': "MARFISA AGUIAR", 'cor': '#FFCC00', 'imagem_url': '/static/mapa/images/marfisa_2012.png'},]
        
    elif ano=="2008":
        return[
             {'nome': "TORRIM", 'cor': '#0080FF', 'imagem_url': '/static/mapa/images/torrim_2008.png'},
-            {'nome': "MARCOS MAR", 'cor': '#FFCC00', 'imagem_url': '/static/mapa/images/marcos_marques_2008.png'},]
+            {'nome': "MARCOS MARQUES", 'cor': '#FFCC00', 'imagem_url': '/static/mapa/images/marcos_marques_2008.png'},]
        
    elif ano=="2004":
        return[
-            {'nome': "MARCOS MAR", 'cor': '#0080FF', 'imagem_url': '/static/mapa/images/marcos_marques_2004.png'},
-            {'nome': "JOSE FLAVI", 'cor': '#c4122d', 'imagem_url': '/static/mapa/images/jose_flavio.png'},]
+            {'nome': "MARCOS MARQUES", 'cor': '#0080FF', 'imagem_url': '/static/mapa/images/marcos_marques_2004.png'},
+            {'nome': "JOSE FLAVIO", 'cor': '#c4122d', 'imagem_url': '/static/mapa/images/jose_flavio.png'},]
    elif ano=="2000":
        return[
             {'nome': "TORRIM", 'cor': '#0080FF', 'imagem_url': '/static/mapa/images/torrim_2000.png'},
-            {'nome': "ENOQUE MOR", 'cor': '#ec008c', 'imagem_url': '/static/mapa/images/enoque_2000.png'},]
+            {'nome': "ENOQUE MORORÓ", 'cor': '#ec008c', 'imagem_url': '/static/mapa/images/enoque_2000.png'},]
    return []
 
 def carregar_geojson_por_ano(ano):
@@ -76,7 +76,6 @@ def cor_bairro(dado, colunas_porcentagem, colunas, year):
             if valor > maior_percentual:
                 maior_percentual = valor
                 name = f"Partido_{nome_candidato(col.replace('Perc_', '').upper(), colunas).upper()}";
-                print("nome: ",name)
                 for j in range(len(colunas)):
                     if(colunas[j] == name[:len(colunas[j] )]):
                          partido = dado.get(colunas[j],0)
@@ -110,15 +109,6 @@ def atualizar_mapa(request):
     candidato = request.GET.get('candidato', None)
     ano = request.GET.get('ano', '2024')
     
-    # Atualizar candidatos
-    candidatos_disponiveis = atualizar_candidatos_por_ano(ano)
-    nomes_candidatos = [c['nome'] for c in candidatos_disponiveis]
-    
-
-    if not candidatos_disponiveis:
-        return JsonResponse({'error': f"Nenhum candidato encontrado para o ano {ano}."}, status=404)
-
-
     # Carregar dados GeoJSON
     gdf, erro = carregar_geojson_por_ano(ano)
     if erro:
@@ -127,30 +117,43 @@ def atualizar_mapa(request):
     colunas = gdf.columns.tolist()
     colunas_porcentagem = [col for col in colunas if col.startswith('Perc_')]
     
-    candidato = nome_candidato(candidato, colunas);
-   
+       # Atualizar candidatos
+    candidatos_disponiveis = atualizar_candidatos_por_ano(ano)
+    nomes_candidatos = [c['nome'] for c in candidatos_disponiveis]
+
+    if not candidatos_disponiveis:
+        return JsonResponse({'error': f"Nenhum candidato encontrado para o ano {ano}."}, status=404)
+    
     if candidato is None:
-        candidato = nome_candidato(nomes_candidatos[0], colunas)
+        candidato = nomes_candidatos[0];
     elif candidato not in nomes_candidatos:
         return JsonResponse({'error': f"Candidato {candidato} não encontrado para o ano {ano}."}, status=404)
     
     # Criar o mapa
     mapa_pf = folium.Map(location=[-4.241, -40.636], zoom_start=12)
-
+    aux = 0;
+    tot_voto_cand = 0;
+    past_bairro = [];
     for i, dado in gdf.iterrows():
         bairro = dado['Endereço']
         name = f"Partido_{candidato.upper()}"
         for j in range(len(colunas)):
             if(colunas[j] == name[:len(colunas[j] )]):
                 partido = colunas[j];
-        print('Partido: '+partido)
         cor = cor_bairro(dado, colunas_porcentagem.copy(), colunas.copy(), ano)
         # Recuperar o percentual do candidato no bairro atual
         coluna_percentual = nome_candidato(f"Perc_{candidato.upper()}", colunas) 
         voto_cand = safe_float_conversion(dado.get(coluna_percentual, 0))
         tot = safe_float_conversion(dado.get('Total_voto', 0))
+        # Supondo que 'past_bairro' é uma lista ou conjunto já inicializado
+        if bairro not in past_bairro:
+            aux += tot  # Incrementa somente uma vez
+            tot_voto_cand+=voto_cand;
+            past_bairro.append(bairro)  # Adiciona o bairro ao conjunto para evitar incrementos futuros
         percentual = (voto_cand/tot)*100;
         percentual_formatado = f"{percentual:.2f}%" if percentual else "0%"
+        percentual_total_candidato = (tot_voto_cand/aux)*100;
+        situacao = "Eleito (a)" if percentual_total_candidato>50 else "Não eleito (a)"
         folium.GeoJson(
             gdf.iloc[i:i+1],
             style_function=lambda feature, color=cor: {
@@ -164,7 +167,7 @@ def atualizar_mapa(request):
             aliases=[
                 'Endereço:', 
                 'Local de Votação:',
-                f'{candidato} ({percentual_formatado}):',
+                'Quantidade de Votos: 'f'{candidato}({percentual_formatado})',
                 "Partido: "
             ],
             localize=True,
