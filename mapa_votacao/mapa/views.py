@@ -133,9 +133,25 @@ def atualizar_mapa(request):
     aux = 0
     tot_voto_cand = 0
     past_bairro = []
-    
-    # Lista para armazenar as porcentagens
+    tot = 0;
+    # Lista para armazenar as porcentagens e barras de progresso
     porcentagens = []
+    
+    for i,dado in gdf.iterrows():
+        coluna_percentual = nome_candidato(f"Perc_{candidato.upper()}", colunas)
+        bairro = dado['Endereço']
+        voto_cand = safe_float_conversion(dado.get(coluna_percentual, 0))
+        tot = safe_float_conversion(dado.get('Total_voto', 0))
+        if bairro not in past_bairro:
+            aux += tot  # Incrementa somente uma vez
+            tot_voto_cand += voto_cand
+            past_bairro.append(bairro)  # Adiciona o bairro ao conjunto para evitar incrementos futuros
+    gdf["Percentual_total"] =((tot_voto_cand/aux)*100)*np.ones((gdf.shape[0],1));
+    gdf["Percentual_total_text"] =  [f"{valor:.4f}%" for valor in gdf["Percentual_total"]]
+    aux = 0;
+    tot = 0;
+    past_bairro = []
+    tot_voto_cand = 0
     
     for i, dado in gdf.iterrows():
         bairro = dado['Endereço']
@@ -154,19 +170,16 @@ def atualizar_mapa(request):
             aux += tot  # Incrementa somente uma vez
             tot_voto_cand += voto_cand
             past_bairro.append(bairro)  # Adiciona o bairro ao conjunto para evitar incrementos futuros
-        
         percentual = (voto_cand / tot) * 100
         percentual_formatado = f"{percentual:.2f}%" if percentual else "0%"
-        
         # Adiciona a porcentagem à lista
         porcentagens.append({
             'bairro': bairro,
             'percentual': percentual_formatado
         })
-        
+                
         percentual_total_candidato = (tot_voto_cand / aux) * 100
         situacao = "Eleito (a)" if percentual_total_candidato > 50 else "Não eleito (a)"
-        
         folium.GeoJson(
             gdf.iloc[i:i+1],
             style_function=lambda feature, color=cor: {
@@ -176,28 +189,23 @@ def atualizar_mapa(request):
                 'fillOpacity': 2
             },
             tooltip=folium.features.GeoJsonTooltip(
-                fields=['Endereço', 'Local de V', coluna_percentual, partido],
+                fields=['Endereço', coluna_percentual, partido,'Percentual_total_text'],
                 aliases=[
-                    'Endereço:', 
-                    'Local de Votação:',
+                    'Bairro: ', 
                     f'Quantidade de Votos: {candidato} ({percentual_formatado})',
-                    "Partido: "
+                    "Partido: ",
+                    "Status: " + ('<span style="color: green;"> Eleito (a)</span>' if gdf["Percentual_total"].get([0]).item() > 50 else '<span style="color: red;"> Não Eleito (a)</span>')  # Adiciona o status de eleição
                 ],
                 localize=True,
                 sticky=True,
+                style='font-size: 14px;'  # Aumenta o tamanho da fonte aqui
             ),
             highlight_function=lambda feature, color=cor: {
                 'color': 'black',
                 'weight': 5,
                 'fillOpacity': 0.5,
                 'fillColor': color
-            },
-            popup=folium.Popup(
-                f"<b>Bairro:</b> {bairro}<br>"
-                f"<b>Candidato:</b> {candidato}<br>"
-                f"<b>Percentual:</b> {percentual_formatado}",
-                max_width=300
-            )
+            }
         ).add_to(mapa_pf)
 
     mapa_html = mapa_pf._repr_html_()
@@ -213,7 +221,6 @@ def atualizar_mapa(request):
             'situacao': situacao,  # Situação eleitoral
             'porcentagens': porcentagens,  # Lista de porcentagens por bairro
         })
-
     
     return render(request, 'mapa/mapa.html', {
         'mapa_html': mapa_html, 
