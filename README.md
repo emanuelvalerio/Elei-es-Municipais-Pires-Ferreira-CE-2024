@@ -21,7 +21,7 @@ Este projeto tem como objetivo principal estimar as regiões correspondentes às
 ## 🌐 Como Usar
 1. Clone este repositório:
    ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
+   git clone https://github.com/emanuelvalerio/Eleicoes-Municipais-Pires-Ferreira-CE-2024.git
    ```
 2. Instale as dependências:
    ```bash
