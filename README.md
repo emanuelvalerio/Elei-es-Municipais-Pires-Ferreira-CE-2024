@@ -35,7 +35,7 @@ Este projeto tem como objetivo principal estimar as regiões correspondentes às
 
 ## 🖼️ Exemplos de Mapas
 ### Eleições 2024:
-![Mapa Eleitoral 2024](imagens/mapa_2024.png)
+![Mapa Eleitoral 2024](Files/2024.png)
 
 ### Eleições 2023:
 ![Mapa Eleitoral 2023](imagens/mapa_2023.png)
