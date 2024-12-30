@@ -35,11 +35,10 @@ Este projeto tem como objetivo principal estimar as regiões correspondentes às
 
 ## 🖼️ Exemplos de Mapas
 ### Eleições 2024:
-![Mapa Eleitoral 2024](Files/2024.png)
+![Mapa Eleitoral 2024](Files/2024.jpeg)
 
-### Eleições 2023:
-![Mapa Eleitoral 2023](imagens/mapa_2023.png)
-
+### Eleições 2020:
+![Mapa Eleitoral 2023](Files/2020.jpeg)
 ## 📬 Contato
 Caso tenha dúvidas ou sugestões, fique à vontade para abrir uma issue ou entrar em contato pelo email **emanuelvalerio@alu.ufc.br**.
 
