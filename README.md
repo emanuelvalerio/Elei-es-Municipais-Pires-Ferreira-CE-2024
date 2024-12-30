@@ -38,7 +38,23 @@ Este projeto tem como objetivo principal estimar as regiões correspondentes às
 ![Mapa Eleitoral 2024](Files/2024.jpeg)
 
 ### Eleições 2020:
-![Mapa Eleitoral 2023](Files/2020.jpeg)
+![Mapa Eleitoral 2020](Files/2020.jpeg)
+
+### Eleições 2016:
+![Mapa Eleitoral 2016](Files/2016.jpeg)
+
+### Eleições 2012:
+![Mapa Eleitoral 2012](Files/2012.jpeg)
+
+### Eleições 2008:
+![Mapa Eleitoral 2008](Files/2008.jpeg)
+
+### Eleições 2004:
+![Mapa Eleitoral 2004](Files/2004.jpeg)
+
+### Eleições 2000:
+![Mapa Eleitoral 2000](Files/2000.jpeg)
+
 ## 📬 Contato
 Caso tenha dúvidas ou sugestões, fique à vontade para abrir uma issue ou entrar em contato pelo email **emanuelvalerio@alu.ufc.br**.
 
