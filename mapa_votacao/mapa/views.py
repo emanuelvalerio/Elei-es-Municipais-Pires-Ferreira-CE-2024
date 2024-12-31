@@ -3,6 +3,9 @@ from django.http import JsonResponse
 import numpy as np
 import geopandas as gpd
 import folium
+import streamlit as st
+import leafmap
+from streamlit_folium import folium_static
 
 def atualizar_candidatos_por_ano(ano):
    """
@@ -110,6 +113,7 @@ def atualizar_mapa(request):
     
     # Carregar dados GeoJSON
     gdf, erro = carregar_geojson_por_ano(ano)
+    
     if erro:
         return JsonResponse(erro, status=404)
 
@@ -192,13 +196,14 @@ def atualizar_mapa(request):
                 fields=['Endereço', coluna_percentual, partido,'Percentual_total_text'],
                 aliases=[
                     'Bairro: ', 
-                    f'Quantidade de Votos: {candidato} ({percentual_formatado})',
+                    f'Votos: {candidato} ({percentual_formatado})',
                     "Partido: ",
                     "Status: " + ('<span style="color: green;"> Eleito (a)</span>' if gdf["Percentual_total"].get([0]).item() > 50 else '<span style="color: red;"> Não Eleito (a)</span>')  # Adiciona o status de eleição
                 ],
                 localize=True,
                 sticky=True,
-                style='font-size: 14px;'  # Aumenta o tamanho da fonte aqui
+                style='font-size: 10px;display: flex; justify-content: space-between;' 
+                
             ),
             highlight_function=lambda feature, color=cor: {
                 'color': 'black',
@@ -207,7 +212,7 @@ def atualizar_mapa(request):
                 'fillColor': color
             }
         ).add_to(mapa_pf)
-
+        
     mapa_html = mapa_pf._repr_html_()
 
     # Retorno AJAX
