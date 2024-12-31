@@ -3,9 +3,6 @@ from django.http import JsonResponse
 import numpy as np
 import geopandas as gpd
 import folium
-import streamlit as st
-import leafmap
-from streamlit_folium import folium_static
 
 def atualizar_candidatos_por_ano(ano):
    """
