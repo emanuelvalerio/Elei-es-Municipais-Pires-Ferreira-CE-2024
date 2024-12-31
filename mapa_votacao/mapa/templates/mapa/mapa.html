@@ -39,13 +39,14 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* Garantir que o corpo do documento ocupe 100% da altura */
+    width: 100vw;
+    overflow: hidden; /* Evitar barras de rolagem desnecessárias */
+    display: flex;
+    flex-direction: column;
+}
 
         #mapa {
         position: fixed; /* Use fixed para garantir que o mapa preencha toda a tela */
@@ -56,7 +57,9 @@
         z-index: 0;
     }
 
-
+        .year_small_screen{
+            display: none;
+        }
         .year-selector {
             position: absolute;
             top: 20px;
@@ -83,33 +86,34 @@
         .year-option:hover {
             background-color: #007bff;
             color: white;
+            
         }
 
         .year-option.active {
-            background-color: #007bff;
-            color: white;
+            background-color: #00ff9d;
+            color: rgb(0, 0, 0);
             font-weight: bold;
             border-color: #007bff;
         }
 
         .menu-container {
-    position: fixed; /* Barra fixa na lateral esquerda */
-    padding: 10px 20px;
-    top: 50%; /* Centraliza verticalmente */
-    left: 8px; /* Alinha à esquerda */
-    transform: translateY(-50%); /* Remove o deslocamento horizontal */
-    width: auto; /* Define a largura da barra */
-    height: auto; /* A altura ocupa toda a tela */
-    background: rgba(255, 255, 255, 1); /* Cor de fundo semitransparente */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    z-index: 15; /* Fica acima do mapa */
-    display: none;
-    flex-direction: column; /* Organiza os candidatos em coluna */
-    justify-content: center; /* Centraliza verticalmente os itens */
-    align-items: center; /* Centraliza horizontalmente os itens */
-    padding: 20px; /* Espaçamento interno */
-    overflow-y: auto; /* Permite rolagem caso o número de candidatos seja grande */
-    border-radius: 15px; /* Arredonda as bordas */
+            position: fixed; /* Barra fixa na lateral esquerda */
+            padding: 10px 20px;
+            top: 50%; /* Centraliza verticalmente */
+            left: 8px; /* Alinha à esquerda */
+            transform: translateY(-50%); /* Remove o deslocamento horizontal */
+            width: auto; /* Define a largura da barra */
+            height: auto; /* A altura ocupa toda a tela */
+            background: rgba(255, 255, 255, 1); /* Cor de fundo semitransparente */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 15; /* Fica acima do mapa */
+            display: none;
+            flex-direction: column; /* Organiza os candidatos em coluna */
+            justify-content: center; /* Centraliza verticalmente os itens */
+            align-items: center; /* Centraliza horizontalmente os itens */
+            padding: 20px; /* Espaçamento interno */
+            overflow-y: auto; /* Permite rolagem caso o número de candidatos seja grande */
+            border-radius: 15px; /* Arredonda as bordas */
 }
 
 
@@ -185,16 +189,143 @@
     75% { width: 75%; }
     100% { width: 100%; }
 }
-/* Media Queries para Responsividade */ @media (max-width: 768px) {
-     .year-selector { flex-direction: column; align-items: center; } 
-     .year-option { padding: 10px 15px; margin: 5px 0; } 
-     .menu-container { flex-direction: column; align-items: center; gap: 20px; }
-      .candidate img { max-width: 60px; } } 
-@media (max-width: 480px) {
-     .year-option { padding: 10px; font-size: 14px; } 
-     .menu-container { gap: 15px; } 
-     .candidate img { max-width: 50px; } 
-     .candidate p { font-size: 14px; }}
+        /* Responsividade */
+/* Media Queries para Responsividade */ 
+     @media (max-width: 768px) {
+    
+        footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 10px 0;
+            font-size: 10px;
+            border-top: 1px solid #ddd;
+            z-index: 20; /* Garante que o rodapé fique acima do conteúdo */
+      }
+      .year_small_screen{
+        display: flex;
+      }
+      .year-text{
+        font-weight: bold; 
+        margin-bottom: 1px; font-size: 12px;
+      }
+      .year-selector {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .year_small_screen .menu {
+    display: flex;
+    flex-direction: column;  /* Empilha os itens verticalmente */
+    gap: 5px;  /* Espaço entre os botões */
+    max-height: 200px;  /* Define a altura máxima visível */
+    overflow-y: auto;  /* Adiciona rolagem se os itens excederem a altura */
+    padding: 0;  /* Remove qualquer padding extra */
+    width: fit-content;  /* Ajusta a largura para o conteúdo (botões) */
+    margin: 0;  /* Remove margens extras, se houver */
+}
+
+.year-option {
+    padding: 5px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    display: block;  /* Garante que cada botão ocupe uma linha vertical */
+}
+
+       .menu-container { flex-direction: column; align-items: center; gap: 20px; }
+        .candidate img { max-width: 60px; } }
+
+
+
+     @media (max-width: 840px) {
+
+        .menu-btn {
+    display: block;  /* Garante que o botão ocupe a linha inteira */
+    margin: 0 auto;  /* Centraliza o ícone dentro do botão */
+    padding: 1px;
+    font-size: 10px; /* Tamanho do ícone */
+    text-align: center; /* Centraliza o ícone */
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    color: #333;
+    transition: transform 0.2s ease, color 0.3s ease; /* Efeito de transição */
+}
+.year-option:hover {
+    background-color: #f0f0f0;  /* Efeito de hover para os botões */
+}
+
+.menu-btn:active {
+    transform: scale(0.9); /* Efeito de clique, reduzindo o tamanho */
+    color: #007bff; /* Muda a cor ao clicar */
+}
+        .year_small_screen{
+            position: fixed;
+            display: block !important;
+            top: 10px; /* Posiciona o menu 10px acima da parte inferior da tela */
+            right: 10px;   /* Posiciona o menu 10px a partir da margem esquerda */
+            background-color: #fff; /* Fundo branco (opcional) */
+            padding: 10px;  /* Espaçamento interno (opcional) */
+            border-radius: 5px;  /* Bordas arredondadas (opcional) */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Sombra opcional */
+            z-index: 9999;  /* Garante que o menu fique por cima de outros elementos */
+        }
+        .year-selector{
+            display: none !important;
+        }
+        .candidate img.active {
+            transform: scale(1.4);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0);
+        }
+        #mapa {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100% !important;/* Garante que ocupe 100% da largura */
+            height: 100% !important; /* Garante que ocupe 100% da altura */
+            z-index: 0;
+            margin: 0;  /* Remove margens que podem estar criando a área branca */
+            padding: 0;  /* Remove qualquer padding extra */
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+         .year-option { padding: 10px; font-size: 14px; }
+         .menu-container {
+            position: fixed;
+            bottom: 0; /* Fica fixo na parte inferior da tela */
+            left: 50%;  /* Alinha à esquerda */
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0); /* Cor de fundo semitransparente */
+            width: 100vw; /* Largura de 100% */
+            height: auto; /* A altura se ajusta conforme o conteúdo */
+            display: flex; /* Exibe como flexbox */
+            flex-direction: row; /* Organiza os itens em uma linha horizontal */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0);
+            justify-content: center; /* Alinha à esquerda */
+            align-items: center; /* Alinha os itens no centro vertical */
+            padding: 5px; /* Ajusta o espaçamento interno */
+    }
+           .candidate img { max-width: 60px;
+                            border-radius: 50%;}
+            .candidate p { font-size: 8px;}}
     </style>
 </head>
 <body>
@@ -205,8 +336,7 @@
                 <div class="loading-bar"></div>
             </div>
         </div>
-
-    
+          
     <div id="mapa" aria-label="Mapa de Votação"></div>
 
     <!-- Selector de anos -->
@@ -215,7 +345,7 @@
 <div class="year-selector" role="menu" aria-label="Selecionar Ano" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
 
     <!-- Texto acima dos botões -->
-    <div class="year-text" style="font-weight: bold; margin-bottom: 10px; font-size: 18px;">
+    <div class="year-text">
         Eleições Municipais Pires Ferreira Ceará
     </div>
     <!-- Botões do menu -->
@@ -229,9 +359,22 @@
         <span class="year-option active" style="padding: 10px 15px; font-weight: bold;" onclick="selecionarAno(this, '2024')">2024</span>
     </div>
 </div>
+
+<div class = "year_small_screen">
+    <button class="menu-btn">☰</button>
+        <ul class="menu">
+            <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2000')">2000</span>
+            <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2004')">2004</span>
+            <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2008')">2008</span>
+            <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2012')">2012</span>
+            <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2016')">2016</span>
+            <span class="year-option" style="padding: 10px 15px; cursor: pointer;" onclick="selecionarAno(this, '2020')">2020</span>
+            <span class="year-option active" style="padding: 10px 15px; font-weight: bold;" onclick="selecionarAno(this, '2024')">2024</span>
+        </ul>
+</div>
     <!-- Menu -->
     <div class="menu-container" role="menu" aria-label="Candidatos"></div>
-
+    
     <footer>
         <p>&copy; 2024 Developed by Emanuel Valério Pereira. All rights reserved.</p>
     </footer>
@@ -240,6 +383,12 @@
     <script>
         const mapaUrl = "{% url 'atualizar_mapa' %}";
         const anoPadrao = '2024'; // Configuração padrão
+        
+        // Adicionar lógica do botão para alternar o menu se necessário
+        document.querySelector("button").addEventListener("click", function() {
+      const menu = document.querySelector(".menu");
+      menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    });
     document.addEventListener('DOMContentLoaded', function() {
     // Botão ou ação que dispara a atualização do mapa
     const atualizarMapa = async () => {
